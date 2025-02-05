@@ -17,6 +17,9 @@
 	"entrypoints": {
 		"main": [
 			"net.hadences.ToasterLib"
+		],
+		"client": [
+			"net.hadences.ToasterLibClient"
 		]
 	},
 	"mixins": [

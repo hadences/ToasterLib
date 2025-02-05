@@ -2,20 +2,19 @@ package net.hadences;
 
 import net.fabricmc.api.ModInitializer;
 
+import net.hadences.network.ToasterPackets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ToasterLib implements ModInitializer {
-	public static final String MOD_ID = "toasterlib";
 
-	// This logger is used to write text to the console and the log file.
-	// It is considered best practice to use your mod id as the logger's name.
-	// That way, it's clear which mod wrote info, warnings, and errors.
+	public static final String MOD_ID = "toasterlib";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	@Override
 	public void onInitialize() {
-
-
+		DebugCommand.register();
+		ToasterPackets.registerPayloads();
+		ToasterPackets.registerC2SPackets();
 	}
 }
