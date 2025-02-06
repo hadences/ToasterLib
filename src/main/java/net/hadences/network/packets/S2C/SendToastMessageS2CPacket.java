@@ -8,6 +8,7 @@ import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.joml.Vector2i;
 
 public record SendToastMessageS2CPacket(ToastMessage message) implements CustomPayload {
     public static final Id<SendToastMessageS2CPacket> PACKET_ID =
@@ -15,6 +16,7 @@ public record SendToastMessageS2CPacket(ToastMessage message) implements CustomP
     public static final PacketCodec<RegistryByteBuf, SendToastMessageS2CPacket> PACKET_CODEC =
             PacketCodec.of(
                     (packet, buffer) -> {
+                        ToastMessage.ToastType type = packet.message.getType();
                         // typoe, position, animation, ticksOnScreen, message, ticksOnScreen
                         buffer.writeInt(packet.message.getType().ordinal());
                         buffer.writeInt(packet.message.getPositionType().ordinal());
@@ -26,6 +28,12 @@ public record SendToastMessageS2CPacket(ToastMessage message) implements CustomP
                                 packet.message.getPositionType() == ToastMessage.ToastPositionType.CUSTOM_CENTERED){
                             buffer.writeInt(packet.message.getOffsetVector().x);
                             buffer.writeInt(packet.message.getOffsetVector().y);
+                        }
+
+                        if(type == ToastMessage.ToastType.IMAGE){
+                            buffer.writeIdentifier(packet.message.getImageIdentifier());
+                            buffer.writeInt(packet.message.getImageSize().x);
+                            buffer.writeInt(packet.message.getImageSize().y);
                         }
                     },
                     buf  -> {
@@ -39,8 +47,17 @@ public record SendToastMessageS2CPacket(ToastMessage message) implements CustomP
                                 position == ToastMessage.ToastPositionType.CUSTOM_CENTERED){
                             int x = buf.readInt();
                             int y = buf.readInt();
+
+                            if(type == ToastMessage.ToastType.IMAGE){
+                                Identifier imageIdentifier = buf.readIdentifier();
+                                int imageWidth = buf.readInt();
+                                int imageHeight = buf.readInt();
+                                return new SendToastMessageS2CPacket(new ToastMessage(imageIdentifier,
+                                        new Vector2i(imageWidth, imageHeight), ticksOnScreen, x, y, animation));
+                            }
+
                             boolean centered = position == ToastMessage.ToastPositionType.CUSTOM_CENTERED;
-                            return new SendToastMessageS2CPacket(new ToastMessage(message, centered, ticksOnScreen, x, y, type, animation));
+                            return new SendToastMessageS2CPacket(new ToastMessage(message, centered, ticksOnScreen, x, y, animation));
                         }
 
                         ToastMessage toast = new ToastMessage(message, ticksOnScreen, type, position, animation);

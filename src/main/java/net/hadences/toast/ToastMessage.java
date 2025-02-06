@@ -1,9 +1,11 @@
 package net.hadences.toast;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import org.joml.Vector2i;
 
 public class ToastMessage {
@@ -15,8 +17,6 @@ public class ToastMessage {
 
     public enum ToastAnimation{
         FADE,
-        SLIDE,
-        POPUP,
         NONE
     }
 
@@ -39,6 +39,9 @@ public class ToastMessage {
     private Vector2i positionVector;
     private Vector2i offsetVector;
 
+    private Identifier imageIdentifier;
+    private Vector2i imageSize;
+
     public ToastMessage(Text text, int ticksOnScreen, ToastType type, ToastPositionType position, ToastAnimation animationType){
         this.text = text;
         this.type = type;
@@ -47,11 +50,21 @@ public class ToastMessage {
         this.ticksOnScreen = ticksOnScreen;
     }
 
-    public ToastMessage(Text text, boolean centeredText, int ticksOnScreen, int centerOffsetX, int centerOffsetY, ToastType type, ToastAnimation animationType){
+    public ToastMessage(Text text, boolean centeredText, int ticksOnScreen, int centerOffsetX, int centerOffsetY, ToastAnimation animationType){
         // call main constructor with custom position
-        this(text, ticksOnScreen, type, centeredText ? ToastPositionType.CUSTOM_CENTERED : ToastPositionType.CUSTOM, animationType);
+        this(text, ticksOnScreen, ToastType.TEXT, centeredText ? ToastPositionType.CUSTOM_CENTERED : ToastPositionType.CUSTOM, animationType);
         this.offsetVector = new Vector2i(centerOffsetX, centerOffsetY);
+    }
 
+    public ToastMessage(Identifier imageIdentifier, Vector2i imageSize, int ticksOnScreen, int centerOffsetX, int centerOffsetY, ToastAnimation animationType){
+        this.type = ToastType.IMAGE;
+        this.positionType = ToastPositionType.CUSTOM;
+        this.animationType = animationType;
+        this.ticksOnScreen = ticksOnScreen;
+        this.text = Text.literal("");
+        this.offsetVector = new Vector2i(centerOffsetX, centerOffsetY);
+        this.imageIdentifier = imageIdentifier;
+        this.imageSize = imageSize;
     }
 
     public void render(DrawContext context, int screenWidth, int screenHeight){
@@ -60,8 +73,6 @@ public class ToastMessage {
         // Render the toast message
         switch (animationType) {
             case FADE -> renderFade(context);
-            case SLIDE -> renderSlide(context);
-            case POPUP -> renderPopup(context);
             case NONE -> renderNone(context);
         }
     }
@@ -93,7 +104,7 @@ public class ToastMessage {
 
         float alpha;
         if (totalDuration > fadeDuration) {
-            alpha = 1.0F - ((float) (totalDuration - ticksOnScreen - fadeDuration) / fadeDuration);
+            alpha = 1.0f;
         } else {
             alpha = (float) totalDuration / fadeDuration;
         }
@@ -101,6 +112,15 @@ public class ToastMessage {
         alpha = Math.max(0.0F, Math.min(1.0F, alpha));
 
         int colorWithAlpha = applyAlpha(alpha);
+
+        if(type == ToastType.IMAGE){
+            RenderSystem.enableBlend();
+            context.setShaderColor(1.0F, 1.0F, 1.0F, alpha);
+            context.drawTexture(imageIdentifier, positionVector.x, positionVector.y, 0, 0, imageSize.x, imageSize.y, imageSize.x, imageSize.y);
+            context.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.disableBlend();
+            return;
+        }
 
         if (shouldRenderCenter()) {
             context.drawCenteredTextWithShadow(textRenderer, text, positionVector.x, positionVector.y, colorWithAlpha);
@@ -115,22 +135,35 @@ public class ToastMessage {
         return (0xFFFFFF) | a;
     }
 
-    private void renderSlide(DrawContext context){
-        // Render the toast message with a slide effect
-    }
-
-    private void renderPopup(DrawContext context){
-        // Render the toast message with a popup effect
-    }
-
     private void renderNone(DrawContext context){
-        // Render the toast message with no effect
+        TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+
+        if(type == ToastType.IMAGE){
+            RenderSystem.enableBlend();
+            context.drawTexture(imageIdentifier, positionVector.x, positionVector.y, 0, 0, imageSize.x, imageSize.y, imageSize.x, imageSize.y);
+            RenderSystem.disableBlend();
+            return;
+        }
+
+        if (shouldRenderCenter()) {
+            context.drawCenteredTextWithShadow(textRenderer, text, positionVector.x, positionVector.y, 0xFFFFFF);
+        } else {
+            context.drawText(textRenderer, text, positionVector.x, positionVector.y, 0xFFFFFF, true);
+        }
     }
 
     private boolean shouldRenderCenter(){
         return positionType == ToastPositionType.TOP_CENTER
                 || positionType == ToastPositionType.BOTTOM_CENTER
                 || positionType == ToastPositionType.CUSTOM_CENTERED;
+    }
+
+    public Identifier getImageIdentifier() {
+        return imageIdentifier;
+    }
+
+    public Vector2i getImageSize() {
+        return imageSize;
     }
 
     public Vector2i getOffsetVector() {

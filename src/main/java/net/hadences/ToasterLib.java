@@ -13,7 +13,7 @@ public class ToasterLib implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		DebugCommand.register();
+//		DebugCommand.register();
 		ToasterPackets.registerPayloads();
 		ToasterPackets.registerC2SPackets();
 	}
