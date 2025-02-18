@@ -53,7 +53,7 @@ public record SendToastMessageS2CPacket(ToastMessage message) implements CustomP
                                 int imageWidth = buf.readInt();
                                 int imageHeight = buf.readInt();
                                 return new SendToastMessageS2CPacket(new ToastMessage(imageIdentifier,
-                                        new Vector2i(imageWidth, imageHeight), ticksOnScreen, x, y, animation));
+                                        new Vector2i(imageWidth, imageHeight), ticksOnScreen, x, y, animation, position));
                             }
 
                             boolean centered = position == ToastMessage.ToastPositionType.CUSTOM_CENTERED;

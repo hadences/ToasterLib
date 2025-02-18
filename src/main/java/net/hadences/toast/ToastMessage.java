@@ -56,9 +56,11 @@ public class ToastMessage {
         this.offsetVector = new Vector2i(centerOffsetX, centerOffsetY);
     }
 
-    public ToastMessage(Identifier imageIdentifier, Vector2i imageSize, int ticksOnScreen, int centerOffsetX, int centerOffsetY, ToastAnimation animationType){
+    public ToastMessage(Identifier imageIdentifier, Vector2i imageSize, int ticksOnScreen,
+                        int centerOffsetX, int centerOffsetY, ToastAnimation animationType,
+                        ToastPositionType positionType){
         this.type = ToastType.IMAGE;
-        this.positionType = ToastPositionType.CUSTOM;
+        this.positionType = positionType;
         this.animationType = animationType;
         this.ticksOnScreen = ticksOnScreen;
         this.text = Text.literal("");
@@ -84,7 +86,8 @@ public class ToastMessage {
 
         int x = 0, y = 0;
         switch (positionType) {
-            case CUSTOM, CUSTOM_CENTERED -> { x = (screenWidth /2) + offsetVector.x; y = (screenHeight / 2) + offsetVector.y; }
+            case CUSTOM -> { x = offsetVector.x; y = offsetVector.y; }
+            case CUSTOM_CENTERED -> { x = (screenWidth /2) + offsetVector.x; y = (screenHeight / 2) + offsetVector.y; }
             case TOP_LEFT -> { x = 10; y = 10; }
             case TOP_CENTER -> { x = (screenWidth / 2); y = 10; }
             case TOP_RIGHT -> { x = screenWidth - textWidth - 8; y = 10; }

@@ -24,20 +24,16 @@ public class DebugCommand {
                         if(player == null) return 0;
 
                         ToastMessage message =
-                                new ToastMessage(Text.literal("<< ᴛᴀꜱᴋ ᴄᴏᴍᴘʟᴇᴛᴇ >>").formatted(Formatting.BOLD).formatted(Formatting.GREEN), true, 20*5, 0, -80,
+                                new ToastMessage(Text.literal("<< ᴛᴀꜱᴋ ᴄᴏᴍᴘʟᴇᴛᴇ >>").formatted(Formatting.BOLD).formatted(Formatting.GREEN), false, 20*5, -380, -80,
                                         ToastMessage.ToastAnimation.FADE);
 
                         ToastMessage message2 =
-                                new ToastMessage(Text.literal(TextUtil.toSmallCaps("You have successfully extracted the data!")).formatted(Formatting.GREEN), true, 20*5, 0, -70,
+                                new ToastMessage(Text.literal(TextUtil.toSmallCaps("You have successfully extracted the data!")).formatted(Formatting.GREEN), false, 20*5, -380, -70,
                                         ToastMessage.ToastAnimation.FADE);
 
-                        ToastMessage imageMessage =
-                                new ToastMessage(USB_IMAGE, new Vector2i(48, 48), 20*5, -24, -85-48,
-                                        ToastMessage.ToastAnimation.NONE);
 
                         ServerPlayNetworking.send(player, new SendToastMessageS2CPacket(message));
                         ServerPlayNetworking.send(player, new SendToastMessageS2CPacket(message2));
-                        ServerPlayNetworking.send(player, new SendToastMessageS2CPacket(imageMessage));
 
                         return 1;
                     })
